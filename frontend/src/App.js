@@ -1,12 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  Camera,
-  Circle,
-  Video,
-  Download,
-  CheckCircle,
-  AlertCircle,
-} from "lucide-react";
+import { Camera } from "lucide-react";
 
 function App() {
   const [esp32IP, setEsp32IP] = useState("192.168.4.1");
@@ -51,14 +44,16 @@ function App() {
         setIsConnected(false);
         setStatus(data.message || "Connection failed");
       }
-    } catch (e) {
+    } catch {
       setIsConnected(false);
       setStatus("Backend not reachable");
     }
   };
 
   const startRecording = async () => {
-    const res = await fetch(`${backendURL}/start_recording`, { method: "POST" });
+    const res = await fetch(`${backendURL}/start_recording`, {
+      method: "POST",
+    });
     const data = await res.json();
     if (data.status === "success") {
       setIsRecording(true);
@@ -78,18 +73,16 @@ function App() {
     fetchRecordings();
   };
 
-  const downloadRecording = (f) =>
-    window.open(`${backendURL}/download/${f}`, "_blank");
+  const downloadRecording = (file) => {
+    window.open(`${backendURL}/download/${file}`, "_blank");
+  };
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 relative">
-      <div className="max-w-7xl mx-auto px-6 py-8">
-
-        {/* Header */}
-        <div className="mb-8 pb-6 border-b border-gray-200 text-center relative">
-          <h1 className="text-3xl font-medium">
-            ESP32-CAM Drone Surveillance
-          </h1>
+    <div className="min-h-screen bg-white text-gray-900">
+      <div className="max-w-7xl mx-auto px-6 py-6">
+        {/* Header (NO LINE BELOW) */}
+        <div className="mb-6 text-center">
+          <h1 className="text-3xl font-medium">ESP32-CAM Drone Surveillance</h1>
           <p className="text-sm text-gray-500 mt-2">
             Live video monitoring and object detection
           </p>
@@ -97,10 +90,8 @@ function App() {
 
         {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
           {/* Left Controls */}
           <div className="lg:col-span-4 space-y-6">
-
             {/* Configuration */}
             <div className="border rounded-lg p-5">
               <h2 className="text-sm font-medium mb-4">Configuration</h2>
@@ -127,15 +118,19 @@ function App() {
               </button>
 
               {status && (
-                <div className={`mt-3 p-2 text-sm rounded ${
-                  isConnected ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                }`}>
+                <div
+                  className={`mt-3 p-2 text-sm rounded ${
+                    isConnected
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                  }`}
+                >
                   {status}
                 </div>
               )}
             </div>
 
-            {/* Recording */}
+            {/* Recording Controls */}
             {isConnected && (
               <div className="border rounded-lg p-5">
                 {!isRecording ? (
@@ -155,14 +150,37 @@ function App() {
                 )}
               </div>
             )}
+
+            {/* Live Detections (Compact & Aligned) */}
+            {isRecording && (
+              <div className="border rounded-lg px-4 py-2">
+                <div className="flex items-center justify-between text-xs text-gray-700">
+                  <span className="font-medium">Live Detection</span>
+
+                  {detections.length === 0 ? (
+                    <span className="text-gray-500">None</span>
+                  ) : (
+                    <span className="font-semibold">
+                      {detections[0].label} ·{" "}
+                      {(detections[0].confidence * 100).toFixed(1)}%
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Live Feed */}
+          {/* Live Feed (BIGGER DISPLAY) */}
           <div className="lg:col-span-8 border rounded-lg p-5">
-            <h2 className="text-sm font-medium mb-4 text-center">Live Feed</h2>
-            <div className="aspect-video bg-gray-100 rounded overflow-hidden">
+            <h2 className="text-sm font-medium mb-3 text-center">Live Feed</h2>
+
+            <div className="bg-gray-100 rounded overflow-hidden h-[420px] lg:h-[500px]">
               {streamURL ? (
-                <img src={streamURL} className="w-full h-full object-contain" />
+                <img
+                  src={streamURL}
+                  alt="Live Stream"
+                  className="w-full h-full object-contain"
+                />
               ) : (
                 <div className="h-full flex items-center justify-center text-gray-400">
                   <Camera size={48} />
@@ -172,27 +190,32 @@ function App() {
           </div>
         </div>
 
-        {/* Recordings */}
-        <div className="mt-10 border rounded-lg p-5">
+        {/* Saved Recordings (MOVED DOWN) */}
+        <div className="mt-16 border rounded-lg p-6">
           <h2 className="text-sm font-medium mb-4 text-center">
             Saved Recordings
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {recordings.map((r, i) => (
-              <div key={i} className="border rounded p-4">
-                <p className="text-sm font-medium truncate">{r.filename}</p>
-                <button
-                  onClick={() => downloadRecording(r.filename)}
-                  className="mt-3 w-full bg-gray-900 text-white py-2 text-xs rounded"
-                >
-                  Download
-                </button>
-              </div>
-            ))}
-          </div>
+          {recordings.length === 0 ? (
+            <p className="text-sm text-gray-500 text-center">
+              No recordings available
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {recordings.map((r, i) => (
+                <div key={i} className="border rounded p-4">
+                  <p className="text-sm font-medium truncate">{r.filename}</p>
+                  <button
+                    onClick={() => downloadRecording(r.filename)}
+                    className="mt-3 w-full bg-gray-900 text-white py-2 text-xs rounded"
+                  >
+                    Download
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-
       </div>
     </div>
   );
