@@ -93,15 +93,6 @@ function App() {
           <p className="text-sm text-gray-500 mt-2">
             Live video monitoring and object detection
           </p>
-
-          <button
-            onClick={() =>
-              fetch(`${backendURL}/shutdown`, { method: "POST" })
-            }
-            className="absolute right-0 top-0 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-md text-sm"
-          >
-            Exit Application
-          </button>
         </div>
 
         {/* Main Grid */}
