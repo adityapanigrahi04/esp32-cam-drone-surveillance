@@ -59,18 +59,18 @@ fi
 sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1
 
 # Ensure pip command exists
-if ! command -v pip >/dev/null 2>&1; then
-  sudo ln -sf /usr/bin/pip3 /usr/bin/pip
+if ! command -v pip &> /dev/null; then
+  sudo ln -s /usr/bin/pip3 /usr/bin/pip
 fi
 
 python --version
-pip --version
+pip3 --version
 
-# ---------- Node.js 18 LTS ----------
-echo "[7/8] Checking Node.js 18 LTS..."
-if ! command -v node >/dev/null 2>&1 || ! node --version | grep -q "^v18"; then
-  echo "Installing Node.js 18 LTS..."
-  curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+# ---------- Node.js 20 LTS ----------
+echo "[7/8] Checking Node.js 20 LTS..."
+if ! command -v node >/dev/null 2>&1 || ! node --version | grep -q "^v20"; then
+  echo "Installing Node.js 20 LTS..."
+  curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
   sudo apt install -y nodejs
 fi
 
