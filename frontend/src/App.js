@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Camera } from "lucide-react";
 
 function App() {
@@ -12,19 +12,19 @@ function App() {
   const [recordings, setRecordings] = useState([]);
   const intervalRef = useRef(null);
 
+  const fetchRecordings = useCallback(async () => {
+    const res = await fetch(`${backendURL}/recordings`);
+    const data = await res.json();
+    setRecordings(data.recordings || []);
+  }, [backendURL]);
+
   useEffect(() => {
     if (isConnected) fetchRecordings();
-  }, [isConnected, backendURL]);
+  }, [isConnected, fetchRecordings]);
 
   useEffect(() => {
     return () => intervalRef.current && clearInterval(intervalRef.current);
   }, []);
-
-  const fetchRecordings = async () => {
-    const res = await fetch(`${backendURL}/recordings`);
-    const data = await res.json();
-    setRecordings(data.recordings || []);
-  };
 
   const testConnection = async () => {
     setStatus("Testing connection...");
@@ -161,7 +161,7 @@ function App() {
                     <span className="text-gray-500">None</span>
                   ) : (
                     <span className="font-semibold">
-                      {detections[0].label} ·{" "}
+                      {detections[0].class} ·{" "}
                       {(detections[0].confidence * 100).toFixed(1)}%
                     </span>
                   )}
