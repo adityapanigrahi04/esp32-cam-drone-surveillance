@@ -1,54 +1,85 @@
 @echo off
+setlocal
+
 echo ============================================
-echo   ESP32 Drone Surveillance - Precheck (Win)
+echo   ESP32 Drone Surveillance - System Precheck
 echo ============================================
 
-:: ---- OS Info ----
-echo Checking OS...
-powershell -command "(Get-CimInstance Win32_OperatingSystem).Caption"
+:: ---------------- OS INFO ----------------
+echo.
+echo [1/6] Checking Operating System...
+powershell -command "(Get-CimInstance Win32_OperatingSystem).Caption" || (
+    echo ❌ Failed to detect OS
+    exit /b 1
+)
 
-:: ---- Architecture ----
-echo Checking architecture...
-echo %PROCESSOR_ARCHITECTURE%
+:: ---------------- ARCH ----------------
+echo.
+echo [2/6] Checking System Architecture...
+echo Architecture: %PROCESSOR_ARCHITECTURE%
 
-:: ---- Admin Check ----
+:: ---------------- ADMIN ----------------
+echo.
+echo [3/6] Checking Administrator Privileges...
 net session >nul 2>&1
-if %errorLevel% neq 0 (
-    echo ❌ Please run PowerShell as ADMIN
+if %errorlevel% neq 0 (
+    echo ❌ Please run Windows Terminal / PowerShell as ADMIN
     pause
     exit /b 1
-) else (
-    echo ✅ Running as Administrator
 )
+echo ✅ Administrator access confirmed
 
-:: ---- Git ----
-echo Checking Git...
-git --version >nul 2>&1 || (
-    echo ❌ Git not installed
+:: ---------------- GIT ----------------
+echo.
+echo [4/6] Checking Git...
+git --version >nul 2>&1
+if %errorlevel% neq 0 (
+    echo ❌ Git NOT installed
+    echo 👉 Install from https://git-scm.com
     pause
     exit /b 1
 )
+git --version
 echo ✅ Git OK
 
-:: ---- Python ----
-echo Checking Python...
-python --version >nul 2>&1 || (
-    echo ❌ Python not installed
+:: ---------------- PYTHON ----------------
+echo.
+echo [5/6] Checking Python...
+python --version >nul 2>&1
+if %errorlevel% neq 0 (
+    echo ❌ Python NOT installed or not in PATH
+    echo 👉 Install from https://www.python.org (check "Add to PATH")
     pause
     exit /b 1
 )
+python --version
 echo ✅ Python OK
 
-:: ---- Node ----
-echo Checking Node.js...
-node --version >nul 2>&1 || (
-    echo ❌ Node.js not installed
+:: ---------------- NODE + NPM ----------------
+echo.
+echo [6/6] Checking Node.js and npm...
+node --version >nul 2>&1
+if %errorlevel% neq 0 (
+    echo ❌ Node.js NOT installed
+    echo 👉 Install LTS from https://nodejs.org
     pause
     exit /b 1
 )
-echo ✅ Node.js OK
 
+npm --version >nul 2>&1
+if %errorlevel% neq 0 (
+    echo ❌ npm NOT available
+    pause
+    exit /b 1
+)
+
+node --version
+npm --version
+echo ✅ Node.js and npm OK
+
+:: ---------------- SUCCESS ----------------
+echo.
 echo ============================================
-echo ✅ SYSTEM CHECK PASSED
+echo ✅ SYSTEM CHECK PASSED - READY TO SETUP
 echo ============================================
 pause
